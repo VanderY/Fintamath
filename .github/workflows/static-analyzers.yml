@@ -1,0 +1,42 @@
+name: Static analyzers
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  BUILD_TYPE: RelWithDebInfo
+
+jobs:
+  analyze:
+    name: Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Install static analyzers
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang
+          sudo apt-get install -y cppcheck clang-tidy iwyu
+
+      - name: Configure CMake
+        working-directory: ${{github.workspace}}
+        run: cmake -B build -D CMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -D BUILD_TESTS:BOOL=FALSE -D ENABLE_CPPCHECK:BOOL=TRUE -D ENABLE_CLANG_TIDY:BOOL=TRUE -D ENABLE_INCLUDE_WHAT_YOU_USE:BOOL=TRUE
+        env:
+          CC: gcc
+          CXX: g++
+
+      - name: Build and perform static analysis
+        working-directory: ${{github.workspace}}
+        run: cmake --build build --config ${{env.BUILD_TYPE}}

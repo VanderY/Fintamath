@@ -1,9 +1,3 @@
-add_subdirectory(lib)
+# src directory
 
-if(BUILD_APP)
-  add_subdirectory(app)
-endif()
-
-if(BUILD_TESTS)
-  add_subdirectory(tests)
-endif()
+add_subdirectory(math_objects)
